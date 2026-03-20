@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  BUYER
+  CODER
+}
+
+enum TaskStatus {
+  OPEN
+  COUNTDOWN
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum TaskDifficulty {
+  EASY
+  MEDIUM
+  HARD
+  EXPERT
+}
+
+enum TaskType {
+  BOUNTY
+  TOURNAMENT
+  CHALLENGE
+}
+
+model User {
+  id          String       @id @default(cuid())
+  name        String
+  email       String       @unique
+  role        UserRole
+  createdAt   DateTime     @default(now())
+  buyerTasks  Task[]
+  joins       TaskJoin[]
+  submissions Submission[]
+}
+
+model Task {
+  id            String         @id @default(cuid())
+  title         String
+  brief         String
+  summary       String
+  description   String
+  prize         Int
+  openSourceBonus Int          @default(0)
+  difficulty    TaskDifficulty
+  type          TaskType
+  techTags      String[]
+  deliverables  String[]
+  rules         String[]
+  timeline      String[]
+  durationHours Int
+  participantLimit Int?
+  startAt       DateTime?
+  endAt         DateTime?
+  status        TaskStatus
+  buyerId       String
+  createdAt     DateTime       @default(now())
+  buyer         User           @relation(fields: [buyerId], references: [id], onDelete: Restrict)
+  joins         TaskJoin[]
+  submissions   Submission[]
+
+  @@index([buyerId])
+  @@index([status])
+}
+
+model TaskJoin {
+  id       String   @id @default(cuid())
+  taskId   String
+  userId   String
+  joinedAt DateTime @default(now())
+  task     Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId])
+  @@index([taskId])
+  @@index([userId])
+}
+
+model Submission {
+  id        String   @id @default(cuid())
+  taskId     String
+  userId     String
+  repoUrl    String
+  deployUrl  String?
+  notes      String?
+  createdAt  DateTime @default(now())
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([userId])
+}
