@@ -113,7 +113,7 @@ export function DashboardPage() {
       <SectionHeader
         eyebrow="Dashboard"
         title="买家控制台"
-        description="创建任务会直接调用后端 API，并刷新控制台列表。"
+        description="创建任务会直接调用后端 API，并刷新控制台列表。保留现有真实数据流，只升级工作台的视觉表达。"
       />
 
       {role !== "BUYER" ? (
@@ -137,25 +137,29 @@ export function DashboardPage() {
         </div>
       ) : null}
 
-      <section className="detail-grid">
-        <form className="panel" onSubmit={handleSubmit}>
-          <h3>创建任务</h3>
+      <section className="dashboard-grid">
+        <form className="panel dashboard-form" onSubmit={handleSubmit}>
+          <div className="dashboard-form__header">
+            <div>
+              <h3>创建任务</h3>
+              <p className="panel__caption">沿用当前后端创建接口，只提升表单组织、留白和阅读节奏。</p>
+            </div>
+            <span className="meta-chip">{role.toLowerCase()}</span>
+          </div>
 
-          <Field label="标题" error={errors.title}>
-            <input className="input" value={form.title} onChange={(event) => updateField("title", event.target.value)} />
-          </Field>
+          <div className="dashboard-form__section">
+            <Field label="标题" error={errors.title}>
+              <input className="input" value={form.title} onChange={(event) => updateField("title", event.target.value)} />
+            </Field>
 
-          <Field label="简版摘要" error={errors.brief}>
-            <input className="input" value={form.brief} onChange={(event) => updateField("brief", event.target.value)} />
-          </Field>
+            <Field label="简版摘要" error={errors.brief}>
+              <input className="input" value={form.brief} onChange={(event) => updateField("brief", event.target.value)} />
+            </Field>
 
-          <Field label="简述" error={errors.summary}>
-            <input
-              className="input"
-              value={form.summary}
-              onChange={(event) => updateField("summary", event.target.value)}
-            />
-          </Field>
+            <Field label="简述" error={errors.summary}>
+              <input className="input" value={form.summary} onChange={(event) => updateField("summary", event.target.value)} />
+            </Field>
+          </div>
 
           <TextAreaField
             label="详细描述"
@@ -163,96 +167,103 @@ export function DashboardPage() {
             onChange={(event) => updateField("description", event.target.value)}
             error={errors.description}
             placeholder="说明任务背景、交付边界和重点。"
+            caption="建议描述期望结果、评分方式和不在范围内的内容。"
           />
 
-          <div className="filters-grid">
-            <Field label="奖金" error={errors.bountyAmount}>
-              <input
-                className="input"
-                type="number"
-                min="1"
-                value={form.bountyAmount}
-                onChange={(event) => updateField("bountyAmount", event.target.value)}
+          <div className="dashboard-form__section">
+            <h3>竞赛参数</h3>
+            <div className="filters-grid">
+              <Field label="奖金" error={errors.bountyAmount}>
+                <input
+                  className="input"
+                  type="number"
+                  min="1"
+                  value={form.bountyAmount}
+                  onChange={(event) => updateField("bountyAmount", event.target.value)}
+                />
+              </Field>
+
+              <Field label="开源奖励">
+                <input
+                  className="input"
+                  type="number"
+                  min="0"
+                  value={form.openSourceBonus}
+                  onChange={(event) => updateField("openSourceBonus", event.target.value)}
+                />
+              </Field>
+
+              <SelectField
+                label="难度"
+                value={form.difficulty}
+                onChange={(event) => updateField("difficulty", event.target.value)}
+                options={[
+                  { value: "1", label: "1" },
+                  { value: "2", label: "2" },
+                  { value: "3", label: "3" },
+                  { value: "4", label: "4" },
+                ]}
               />
-            </Field>
 
-            <Field label="开源奖励">
-              <input
-                className="input"
-                type="number"
-                min="0"
-                value={form.openSourceBonus}
-                onChange={(event) => updateField("openSourceBonus", event.target.value)}
+              <Field label="时长（分钟）" error={errors.timeLimit}>
+                <input
+                  className="input"
+                  type="number"
+                  min="1"
+                  value={form.timeLimit}
+                  onChange={(event) => updateField("timeLimit", event.target.value)}
+                />
+              </Field>
+
+              <SelectField
+                label="状态"
+                value={form.status}
+                onChange={(event) => updateField("status", event.target.value)}
+                options={[
+                  { value: "OPEN", label: "报名中" },
+                  { value: "COUNTDOWN", label: "即将开始" },
+                  { value: "IN_PROGRESS", label: "进行中" },
+                  { value: "COMPLETED", label: "已完成" },
+                ]}
               />
-            </Field>
-
-            <SelectField
-              label="难度"
-              value={form.difficulty}
-              onChange={(event) => updateField("difficulty", event.target.value)}
-              options={[
-                { value: "1", label: "1" },
-                { value: "2", label: "2" },
-                { value: "3", label: "3" },
-                { value: "4", label: "4" },
-              ]}
-            />
-
-            <Field label="时长（分钟）" error={errors.timeLimit}>
-              <input
-                className="input"
-                type="number"
-                min="1"
-                value={form.timeLimit}
-                onChange={(event) => updateField("timeLimit", event.target.value)}
-              />
-            </Field>
-
-            <SelectField
-              label="状态"
-              value={form.status}
-              onChange={(event) => updateField("status", event.target.value)}
-              options={[
-                { value: "OPEN", label: "报名中" },
-                { value: "COUNTDOWN", label: "即将开始" },
-                { value: "IN_PROGRESS", label: "进行中" },
-                { value: "COMPLETED", label: "已完成" },
-              ]}
-            />
+            </div>
           </div>
 
-          <SelectField
-            label="类型"
-            value={form.type}
-            onChange={(event) => updateField("type", event.target.value)}
-            options={[
-              { value: "BOUNTY", label: "Bounty" },
-              { value: "TOURNAMENT", label: "Tournament" },
-              { value: "CHALLENGE", label: "Challenge" },
-            ]}
-          />
+          <div className="dashboard-form__section">
+            <h3>任务结构</h3>
+            <SelectField
+              label="类型"
+              value={form.type}
+              onChange={(event) => updateField("type", event.target.value)}
+              options={[
+                { value: "BOUNTY", label: "Bounty" },
+                { value: "TOURNAMENT", label: "Tournament" },
+                { value: "CHALLENGE", label: "Challenge" },
+              ]}
+            />
 
-          <Field label="技术标签（逗号分隔）">
-            <input className="input" value={form.techTags} onChange={(event) => updateField("techTags", event.target.value)} />
-          </Field>
+            <Field label="技术标签（逗号分隔）" caption="例如：React, Prisma, Dashboard">
+              <input className="input" value={form.techTags} onChange={(event) => updateField("techTags", event.target.value)} />
+            </Field>
 
-          <TextAreaField
-            label="交付物（每行一条）"
-            value={form.deliverables}
-            onChange={(event) => updateField("deliverables", event.target.value)}
-          />
+            <TextAreaField
+              label="交付物（每行一条）"
+              value={form.deliverables}
+              onChange={(event) => updateField("deliverables", event.target.value)}
+            />
 
-          <TextAreaField
-            label="规则（每行一条）"
-            value={form.rules}
-            onChange={(event) => updateField("rules", event.target.value)}
-          />
+            <TextAreaField
+              label="规则（每行一条）"
+              value={form.rules}
+              onChange={(event) => updateField("rules", event.target.value)}
+            />
 
-          <TextAreaField
-            label="时间安排（每行一条）"
-            value={form.timeline}
-            onChange={(event) => updateField("timeline", event.target.value)}
-          />
+            <TextAreaField
+              label="时间安排（每行一条）"
+              value={form.timeline}
+              onChange={(event) => updateField("timeline", event.target.value)}
+            />
+          </div>
 
           <div className="stack-actions">
             <button className="button" type="submit" disabled={submitting || role !== "BUYER"}>
@@ -261,8 +272,13 @@ export function DashboardPage() {
           </div>
         </form>
 
-        <section className="panel">
-          <h3>最近任务</h3>
+        <section className="panel panel--spotlight">
+          <div className="dashboard-hero">
+            <span className="section-meta">Buyer Workspace</span>
+            <h3>最近任务</h3>
+            <p>保留当前控制台数据流，强调任务状态、奖金和跳转入口，让页面更像持续运营中的任务面板。</p>
+          </div>
+
           <div className="table-like">
             <div className="table-like__head">
               <span>标题</span>
@@ -271,7 +287,7 @@ export function DashboardPage() {
               <span>操作</span>
             </div>
             {recentTasks.map((task) => (
-              <div key={task.id} className="table-like__row">
+              <div key={task.id} className="table-like__row dashboard-list__row">
                 <span>{task.title}</span>
                 <span>{task.status}</span>
                 <span>${task.bountyAmount}</span>
@@ -279,6 +295,23 @@ export function DashboardPage() {
                   查看
                 </Link>
               </div>
+            ))}
+          </div>
+
+          <div className="list-stack">
+            {recentTasks.slice(0, 3).map((task) => (
+              <article key={task.id} className="submission-card">
+                <div className="panel__header">
+                  <h3>{task.title}</h3>
+                  <span className="meta-chip">{task.type}</span>
+                </div>
+                <p>{task.brief || task.summary}</p>
+                <div className="dashboard-list__meta">
+                  <span className="meta-chip">{task.status}</span>
+                  <span className="meta-chip">${task.bountyAmount}</span>
+                  <span className="meta-chip">{task.currentParticipants}/{task.maxParticipants} joined</span>
+                </div>
+              </article>
             ))}
           </div>
         </section>

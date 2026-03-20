@@ -35,7 +35,11 @@ export function TopNav() {
     <header className="top-nav">
       <div className="container top-nav__inner">
         <NavLink to="/" end className="brand">
-          VibeBattle
+          <span className="brand__mark">V</span>
+          <span className="brand__text">
+            <strong>VibeBattle</strong>
+            <span>The Arena for Vibe Coders</span>
+          </span>
         </NavLink>
 
         <nav className="top-nav__links">
@@ -70,10 +74,15 @@ export function TopNav() {
               coder
             </button>
           </div>
-          <span className="top-nav__user-label">
-            {currentUser ? `${currentUser.name} (${currentUser.role.toLowerCase()})` : "loading user"}
-          </span>
-          {error ? <span className="top-nav__user-error">{error}</span> : null}
+          <div className="top-nav__identity">
+            <span className="top-nav__user-label">
+              {currentUser ? currentUser.name : "loading user"}
+            </span>
+            <span className="top-nav__user-meta">
+              {currentUser ? currentUser.role.toLowerCase() : "syncing profile"}
+            </span>
+            {error ? <span className="top-nav__user-error">{error}</span> : null}
+          </div>
         </div>
       </div>
     </header>

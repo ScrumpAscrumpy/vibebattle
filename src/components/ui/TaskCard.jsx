@@ -3,6 +3,8 @@ import { StatusBadge } from "./StatusBadge";
 import { Pill } from "./Pill";
 
 export function TaskCard({ task }) {
+  const tags = task.techTags.slice(0, 3);
+
   return (
     <article className="task-card">
       <div className="task-card__top">
@@ -18,23 +20,30 @@ export function TaskCard({ task }) {
 
       <div className="task-card__body">
         <h3>{task.title}</h3>
-        <p>{task.brief || task.summary}</p>
+        <p className="task-card__brief">{task.brief || task.summary}</p>
       </div>
 
       <div className="task-card__meta">
-        <span>难度 {task.difficulty}/4</span>
-        <span>{task.timeLimit} min</span>
-        <span>{task.currentParticipants}/{task.maxParticipants} 人</span>
+        <span className="meta-chip">难度 {task.difficulty}/4</span>
+        <span className="meta-chip">{task.type}</span>
+        <span className="meta-chip">{task.timeLimit} min</span>
+        <span className="meta-chip">
+          {task.currentParticipants}/{task.maxParticipants} 人
+        </span>
       </div>
 
       <div className="pill-row">
-        {task.techTags.map((tag) => (
+        {tags.map((tag) => (
           <Pill key={tag}>{tag}</Pill>
         ))}
+        {task.techTags.length > tags.length ? <span className="meta-chip">+{task.techTags.length - tags.length}</span> : null}
       </div>
 
       <div className="task-card__footer">
-        <span>{task.creator.displayName}</span>
+        <div className="task-card__creator">
+          <strong>{task.creator.displayName}</strong>
+          <span>{task.currentParticipants}/{task.maxParticipants} 已报名</span>
+        </div>
         <div className="task-card__actions">
           <Link className="button button--ghost" to={`/tasks/${task.id}`}>
             查看详情

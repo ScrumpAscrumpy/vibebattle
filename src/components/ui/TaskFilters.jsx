@@ -12,6 +12,12 @@ export function TaskFilters({
 }) {
   return (
     <section className="panel filters-panel">
+      <div className="panel__header">
+        <div>
+          <h3>筛选与排序</h3>
+          <p className="panel__caption">保留现有真实 API 数据流，只在前端做轻量搜索和排序整理。</p>
+        </div>
+      </div>
       <div className="filters-grid">
         <label className="form-field">
           <span className="form-field__label">关键词搜索</span>

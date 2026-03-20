@@ -99,7 +99,8 @@ export function TasksPage() {
       <SectionHeader
         eyebrow="Tasks"
         title="任务市场"
-        description="支持关键词搜索、筛选、排序。任务数据当前优先来自后端 API。"
+        description="支持关键词搜索、筛选、排序。保留真实 API 数据流，并在列表层补足更明确的任务识别与报名状态。"
+        action={<span className="meta-chip">{filteredTasks.length} tasks</span>}
       />
 
       <TaskFilters

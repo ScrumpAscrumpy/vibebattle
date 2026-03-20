@@ -146,65 +146,124 @@ export function TaskDetailPage() {
       {feedback ? <FeedbackBanner type="success">{feedback}</FeedbackBanner> : null}
       {error ? <FeedbackBanner type="error">{error}</FeedbackBanner> : null}
 
+      <section className="detail-hero">
+        <article className="detail-highlight">
+          <div className="detail-highlight__top">
+            <div>
+              <span className="section-meta">Competition Brief</span>
+              <h3>{task.title}</h3>
+            </div>
+            <div className="detail-highlight__amount">
+              <strong>${task.bountyAmount}</strong>
+              <span className="panel__caption">+ ${task.openSourceBonus ?? 0} open source bonus</span>
+            </div>
+          </div>
+          <p className="detail-highlight__summary">{task.brief || task.summary}</p>
+          <div className="detail-highlight__meta">
+            <span className="meta-chip">{task.type}</span>
+            <span className="meta-chip">难度 {task.difficulty}/4</span>
+            <span className="meta-chip">{task.durationHours} h</span>
+            <span className="meta-chip">{task.currentParticipants}/{task.maxParticipants} joined</span>
+          </div>
+        </article>
+
+        <aside className="detail-rail">
+          <div className="panel panel--dense">
+            <h3>竞赛动作</h3>
+            <p className="panel__caption">保留现有报名与 Arena 跳转逻辑，仅优化信息表达与视觉层级。</p>
+            <div className="stack-actions">
+              <button className="button" onClick={handleEnroll} disabled={actionConfig.disabled || submitting}>
+                {submitting ? "提交中..." : actionConfig.label}
+              </button>
+              {role === "CODER" ? (
+                <Link className="button button--ghost" to={`/arena/${task.id}`}>
+                  前往 Arena
+                </Link>
+              ) : (
+                <button className="button button--ghost" type="button" disabled>
+                  coder 可进入 Arena
+                </button>
+              )}
+              <Link className="button button--ghost" to="/tasks">
+                返回任务市场
+              </Link>
+            </div>
+          </div>
+        </aside>
+      </section>
+
       <section className="detail-grid">
         <article className="panel detail-main">
-          <h3>任务说明</h3>
+          <div className="panel__header">
+            <div>
+              <h3>任务说明</h3>
+              <p className="panel__caption">聚焦需求背景、交付范围和判断标准。</p>
+            </div>
+          </div>
           <p>{task.description}</p>
 
-          <h3>交付内容</h3>
-          <ul className="clean-list">
-            {task.deliverables.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-
-          <h3>实现重点</h3>
-          <div className="pill-row">
-            {task.briefList.map((item) => (
-              <Pill key={item}>{item}</Pill>
-            ))}
+          <div>
+            <h3>交付内容</h3>
+            <ul className="clean-list">
+              {task.deliverables.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
           </div>
 
-          <h3>规则说明</h3>
-          <ul className="clean-list">
-            {task.rules.map((rule) => (
-              <li key={rule}>{rule}</li>
-            ))}
-          </ul>
+          <div>
+            <h3>实现重点</h3>
+            <div className="pill-row">
+              {task.briefList.map((item) => (
+                <Pill key={item}>{item}</Pill>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3>规则说明</h3>
+            <ul className="clean-list">
+              {task.rules.map((rule) => (
+                <li key={rule}>{rule}</li>
+              ))}
+            </ul>
+          </div>
         </article>
 
         <aside className="panel detail-side">
-          <h3>竞赛信息</h3>
-          <dl className="detail-list">
-            <div>
-              <dt>奖金</dt>
-              <dd>${task.bountyAmount}</dd>
-            </div>
-            <div>
-              <dt>开源奖励</dt>
-              <dd>${task.openSourceBonus ?? 0}</dd>
-            </div>
-            <div>
-              <dt>限制时长</dt>
-              <dd>{task.durationHours} h</dd>
-            </div>
-            <div>
-              <dt>难度</dt>
-              <dd>{task.difficulty}/4</dd>
-            </div>
-            <div>
-              <dt>类型</dt>
-              <dd>{task.type}</dd>
-            </div>
-            <div>
-              <dt>发起方</dt>
-              <dd>{task.creator.displayName}</dd>
-            </div>
-            <div>
-              <dt>报名上限</dt>
-              <dd>{task.maxParticipants}</dd>
-            </div>
-          </dl>
+          <div>
+            <h3>竞赛信息</h3>
+            <dl className="detail-list">
+              <div>
+                <dt>奖金</dt>
+                <dd>${task.bountyAmount}</dd>
+              </div>
+              <div>
+                <dt>开源奖励</dt>
+                <dd>${task.openSourceBonus ?? 0}</dd>
+              </div>
+              <div>
+                <dt>限制时长</dt>
+                <dd>{task.durationHours} h</dd>
+              </div>
+              <div>
+                <dt>难度</dt>
+                <dd>{task.difficulty}/4</dd>
+              </div>
+              <div>
+                <dt>类型</dt>
+                <dd>{task.type}</dd>
+              </div>
+              <div>
+                <dt>发起方</dt>
+                <dd>{task.creator.displayName}</dd>
+              </div>
+              <div>
+                <dt>报名上限</dt>
+                <dd>{task.maxParticipants}</dd>
+              </div>
+            </dl>
+          </div>
 
           <div>
             <h3>时间安排</h3>
@@ -218,28 +277,13 @@ export function TaskDetailPage() {
             </div>
           </div>
 
-          <div className="pill-row">
-            {task.techTags.map((tag) => (
-              <Pill key={tag}>{tag}</Pill>
-            ))}
-          </div>
-
-          <div className="stack-actions">
-            <button className="button" onClick={handleEnroll} disabled={actionConfig.disabled || submitting}>
-              {submitting ? "提交中..." : actionConfig.label}
-            </button>
-            {role === "CODER" ? (
-              <Link className="button button--ghost" to={`/arena/${task.id}`}>
-                前往 Arena
-              </Link>
-            ) : (
-              <button className="button button--ghost" type="button" disabled>
-                coder 可进入 Arena
-              </button>
-            )}
-            <Link className="button button--ghost" to="/tasks">
-              返回任务市场
-            </Link>
+          <div>
+            <h3>技术栈偏好</h3>
+            <div className="pill-row">
+              {task.techTags.map((tag) => (
+                <Pill key={tag}>{tag}</Pill>
+              ))}
+            </div>
           </div>
         </aside>
       </section>

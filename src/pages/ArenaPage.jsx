@@ -161,10 +161,31 @@ export function ArenaPage() {
         <StatCard label="最近提交" value={latestSubmission ? "已提交" : "暂无"} hint="从后端接口读取" />
       </div>
 
-      <section className="detail-grid">
+      <section className="arena-grid">
         <article className="panel">
-          <h3>当前赛题</h3>
+          <div className="panel__header">
+            <div>
+              <h3>当前赛题</h3>
+              <p className="panel__caption">延续现有详情与提交逻辑，只重构 Arena 的阅读节奏和信息组织。</p>
+            </div>
+            <span className="meta-chip">{task.type}</span>
+          </div>
           <p>{task.description}</p>
+
+          <div className="arena-summary">
+            <div className="arena-summary__row">
+              <span>奖金池</span>
+              <strong>${task.bountyAmount}</strong>
+            </div>
+            <div className="arena-summary__row">
+              <span>开源奖励</span>
+              <strong>${task.openSourceBonus ?? 0}</strong>
+            </div>
+            <div className="arena-summary__row">
+              <span>报名人数</span>
+              <strong>{task.currentParticipants}/{task.maxParticipants}</strong>
+            </div>
+          </div>
 
           <h3>建议流程</h3>
           <ol className="clean-list clean-list--numbered">
@@ -199,8 +220,14 @@ export function ArenaPage() {
           ) : null}
         </article>
 
-        <aside className="panel">
-          <h3>提交作品</h3>
+        <aside className="panel arena-form">
+          <div className="arena-form__header">
+            <div>
+              <h3>提交作品</h3>
+              <p className="panel__caption">Repo、部署地址和说明沿用现有 API 结构，不改变数据流。</p>
+            </div>
+            <span className="meta-chip">{role.toLowerCase()}</span>
+          </div>
           <form className="form-stack" onSubmit={handleSubmit}>
             <Field label="repoUrl" error={errors.repoUrl}>
               <input
