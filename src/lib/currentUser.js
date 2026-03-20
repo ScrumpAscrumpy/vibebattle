@@ -5,7 +5,9 @@ export function readCurrentUser() {
 }
 
 export async function switchCurrentUser(role) {
-  const response = await apiRequest(`/api/users/me?role=${role}`);
+  const response = await apiRequest(`/api/users/me?role=${role}`, {
+    skipUserHeader: true,
+  });
   setStoredCurrentUser(response.data);
   return response.data;
 }

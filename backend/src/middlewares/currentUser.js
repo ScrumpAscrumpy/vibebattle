@@ -5,13 +5,13 @@ export async function currentUser(req, _res, next) {
     const userId = req.headers["x-user-id"] || req.query.userId;
     const role = req.query.role;
 
-    if (userId) {
-      req.currentUser = await findUserById(String(userId));
+    if (role) {
+      req.currentUser = await findUserByRole(String(role).toUpperCase());
       return next();
     }
 
-    if (role) {
-      req.currentUser = await findUserByRole(String(role).toUpperCase());
+    if (userId) {
+      req.currentUser = await findUserById(String(userId));
       return next();
     }
 

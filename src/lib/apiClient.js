@@ -11,11 +11,15 @@ export class ApiError extends Error {
 }
 
 export async function apiRequest(path, options = {}) {
+  return performRequest(path, options, true);
+}
+
+async function performRequest(path, options = {}, allowRetry = false) {
   const currentUser = getStoredCurrentUser();
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: {
       "Content-Type": "application/json",
-      ...(currentUser?.id ? { "x-user-id": currentUser.id } : {}),
+      ...(!options.skipUserHeader && currentUser?.id ? { "x-user-id": currentUser.id } : {}),
       ...(options.headers || {}),
     },
     ...options,
@@ -25,6 +29,15 @@ export async function apiRequest(path, options = {}) {
   const payload = contentType.includes("application/json") ? await response.json() : null;
 
   if (!response.ok) {
+    if (
+      allowRetry &&
+      currentUser?.id &&
+      payload?.error?.details?.code === "USER_NOT_FOUND"
+    ) {
+      clearStoredCurrentUser();
+      return performRequest(path, { ...options, skipUserHeader: true }, false);
+    }
+
     const message = payload?.error?.message || "请求失败，请稍后重试。";
     throw new ApiError(message, response.status, payload?.error?.details || null);
   }
