@@ -7,7 +7,6 @@ import {
   assertRequiredString,
 } from "../utils/validation.js";
 import { getFixedBuyerUser, getFixedCoderUser } from "./userService.js";
-import { ensureMvpSeedData } from "./bootstrapService.js";
 
 const TASK_STATUS_VALUES = ["OPEN", "COUNTDOWN", "IN_PROGRESS", "COMPLETED"];
 const TASK_DIFFICULTY_VALUES = ["EASY", "MEDIUM", "HARD", "EXPERT"];
@@ -80,7 +79,6 @@ function parseStringArray(value) {
 }
 
 export async function getTaskList(query = {}) {
-  await ensureMvpSeedData();
   const where = {};
 
   if (query.status) {
@@ -111,7 +109,6 @@ export async function getTaskList(query = {}) {
 }
 
 export async function findTaskById(taskId) {
-  await ensureMvpSeedData();
   const task = await prisma.task.findUnique({
     where: { id: taskId },
     include: {
@@ -194,7 +191,6 @@ export async function createTaskRecord(payload, currentUser) {
 }
 
 export async function getJoinStatusForTask(taskId, currentUser) {
-  await ensureMvpSeedData();
   const task = await prisma.task.findUnique({ where: { id: taskId } });
 
   if (!task) {
@@ -220,7 +216,6 @@ export async function getJoinStatusForTask(taskId, currentUser) {
 }
 
 export async function joinTaskById(taskId, currentUser) {
-  await ensureMvpSeedData();
   const task = await prisma.task.findUnique({ where: { id: taskId } });
 
   if (!task) {
@@ -259,7 +254,6 @@ export async function joinTaskById(taskId, currentUser) {
 }
 
 export async function saveTaskSubmission(taskId, payload, currentUser) {
-  await ensureMvpSeedData();
   const task = await prisma.task.findUnique({ where: { id: taskId } });
 
   if (!task) {
@@ -295,7 +289,6 @@ export async function saveTaskSubmission(taskId, payload, currentUser) {
 }
 
 export async function getSubmissionList(taskId) {
-  await ensureMvpSeedData();
   const task = await prisma.task.findUnique({ where: { id: taskId } });
 
   if (!task) {

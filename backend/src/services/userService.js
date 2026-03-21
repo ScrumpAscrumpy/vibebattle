@@ -1,5 +1,4 @@
 import { prisma } from "../lib/prisma.js";
-import { ensureMvpSeedData } from "./bootstrapService.js";
 import { HttpError } from "../utils/httpError.js";
 
 function assertUserExists(user, details) {
@@ -11,7 +10,6 @@ function assertUserExists(user, details) {
 }
 
 export async function findUserById(userId) {
-  await ensureMvpSeedData();
   const user = await prisma.user.findUnique({
     where: { id: userId },
   });
@@ -23,7 +21,6 @@ export async function findUserById(userId) {
 }
 
 export async function findUserByRole(role) {
-  await ensureMvpSeedData();
   const user = await prisma.user.findFirst({
     where: { role },
     orderBy: { createdAt: "asc" },

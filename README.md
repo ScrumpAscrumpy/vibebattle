@@ -1,242 +1,320 @@
 # VibeBattle
 
-VibeBattle 是一个面向 Vibe Coding 场景的竞赛平台 MVP。当前仓库已经包含：
+VibeBattle 是一个 Vibe Coding 竞赛平台 MVP。
+
+当前仓库包含：
 
 - 前端：Vite + React
 - 后端：Node.js + Express
 - 数据库：PostgreSQL + Prisma
 
-本轮目标是让项目具备部署到线上预览环境的条件。
+本地开发现在默认使用真实 PostgreSQL 数据库，不再依赖后端自动 mock 数据兜底。
+
+## 我选择的本地数据库方案
+
+本地开发数据库方案：`Docker Desktop + docker compose + PostgreSQL 16`
+
+选择原因：
+
+- 保持你现在的 `PostgreSQL + Prisma` 路线，不改成 SQLite
+- 不影响线上 Render + Neon 的 `DATABASE_URL` 使用方式
+- 本地和线上数据库类型一致，联调更稳定
+- 对非专业开发者更简单，只要先装好 Docker Desktop
 
 ## 项目结构
 
 ```text
 vibebattle/
-  src/         # 前端
-  backend/     # 后端
-  vercel.json  # 前端 SPA 路由重写
+  src/              # 前端
+  backend/          # 后端
+  docker-compose.yml
+  vercel.json
 ```
 
-## 本地启动
-
-### 1. 启动前端
-
-```bash
-cd /Users/scrumpy/Documents/vibebattle
-cp .env.example .env
-npm install
-npm run dev
-```
-
-前端环境变量：
-
-- `VITE_API_BASE_URL`
-  默认值：`http://127.0.0.1:4000`
-
-### 2. 启动后端
-
-```bash
-cd /Users/scrumpy/Documents/vibebattle/backend
-cp .env.example .env
-npm install
-npm start
-```
-
-如果本机 `4000` 端口被占用：
-
-```bash
-cd /Users/scrumpy/Documents/vibebattle/backend
-PORT=4001 npm start
-```
-
-后端环境变量：
-
-- `PORT`
-- `NODE_ENV`
-- `DATABASE_URL`
-- `CORS_ORIGIN`
-
-## 部署建议
-
-推荐组合：
-
-- 前端：Vercel
-- 后端：Render 或 Railway
-- 数据库：Neon Postgres
-
-## 前端部署步骤
-
-### Vercel
-
-1. 将仓库导入 Vercel
-2. Root Directory 选择仓库根目录 `vibebattle`
-3. Build Command 使用：
-
-```bash
-npm run build
-```
-
-4. Output Directory 使用：
-
-```bash
-dist
-```
-
-5. 添加前端环境变量：
-
-```bash
-VITE_API_BASE_URL=https://your-backend-domain.onrender.com
-```
-
-6. 重新部署
-
-### React Router 处理
-
-前端使用 React Router，线上需要把任意路径都重写到 `index.html`。
-
-这个仓库已经提供：
-
-- [vercel.json](/Users/scrumpy/Documents/vibebattle/vercel.json)
-
-它会把 Vercel 上的所有前端路由重写到单页应用入口，确保：
-
-- `/`
-- `/tasks`
-- `/tasks/:id`
-- `/arena/:id`
-- `/dashboard`
-
-都能直接刷新访问。
-
-## 后端部署步骤
-
-### Render
-
-1. 在 Render 新建 Web Service
-2. Root Directory 选择：
-
-```bash
-backend
-```
-
-3. Build Command：
-
-```bash
-npm install
-```
-
-4. Start Command：
-
-```bash
-npm start
-```
-
-5. 添加环境变量：
-
-```bash
-PORT=4000
-NODE_ENV=production
-DATABASE_URL=你的 Neon 连接串
-CORS_ORIGIN=https://your-frontend.vercel.app
-```
-
-如果需要允许多个域名，可以写成逗号分隔：
-
-```bash
-CORS_ORIGIN=https://your-frontend.vercel.app,https://preview-branch.vercel.app
-```
-
-6. 部署成功后，执行：
-
-```bash
-npm run prisma:deploy
-```
-
-如需初始化演示数据，再执行：
-
-```bash
-npm run prisma:seed
-```
-
-### Railway
-
-Railway 流程基本相同：
-
-1. 选择 `backend` 目录作为服务
-2. 安装命令：`npm install`
-3. 启动命令：`npm start`
-4. 配置 `DATABASE_URL`、`CORS_ORIGIN`、`NODE_ENV`
-
-## 数据库配置步骤
-
-### Neon Postgres
-
-1. 创建 Neon 项目
-2. 新建数据库
-3. 拿到连接串
-4. 将连接串写入后端环境变量：
-
-```bash
-DATABASE_URL=postgresql://...
-```
-
-5. 在后端服务环境中执行 migration：
-
-```bash
-npm run prisma:deploy
-```
-
-6. 如需演示数据，执行：
-
-```bash
-npm run prisma:seed
-```
-
-## 生产环境需要的环境变量
+## 环境变量
 
 ### 前端
 
-- `VITE_API_BASE_URL`
+复制根目录环境变量：
+
+```bash
+cp .env.example .env
+```
+
+默认内容：
+
+```bash
+VITE_API_BASE_URL=http://127.0.0.1:4000
+```
 
 ### 后端
 
-- `PORT`
-- `NODE_ENV=production`
-- `DATABASE_URL`
-- `CORS_ORIGIN`
-
-## 健康检查
-
-后端已提供健康检查接口：
-
-- `GET /health`
-
-线上可用于部署平台健康检查，例如：
+复制后端环境变量：
 
 ```bash
-https://your-backend-domain.onrender.com/health
+cd backend
+cp .env.example .env
 ```
 
-## 最小上线检查清单
+本地默认数据库连接：
 
-上线前至少确认以下内容：
+```bash
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/vibebattle?schema=public"
+```
 
-1. 前端本地 `npm run build` 通过
-2. 后端本地 `npm start` 能启动
-3. Neon 数据库已创建
-4. `DATABASE_URL` 已正确配置到后端平台
-5. 已执行 `npm run prisma:deploy`
-6. 如需演示数据，已执行 `npm run prisma:seed`
-7. 前端 `VITE_API_BASE_URL` 已指向线上后端域名
-8. 后端 `CORS_ORIGIN` 已包含前端线上域名
-9. 线上访问 `/health` 返回正常
-10. 线上前端刷新 `/tasks`、`/dashboard` 不会 404
+线上环境继续使用部署平台自己的 `DATABASE_URL`，不要把真实线上密钥写进仓库。
 
-## 当前不包含的内容
+## 本地启动说明
 
-本轮仍然不包含：
+### 先决条件
 
-- 支付
-- 文件上传
-- WebSocket
-- 正式监控系统
+你需要先安装：
+
+1. Node.js
+2. npm
+3. Docker Desktop
+
+确认 Docker 已启动后，再继续下面步骤。
+
+### 第一步：启动本地 PostgreSQL
+
+在项目根目录执行：
+
+```bash
+cd /Users/scrumpy/Documents/vibebattle
+npm run db:up
+```
+
+如果你想看数据库日志：
+
+```bash
+npm run db:logs
+```
+
+### 第二步：初始化 Prisma 本地数据库
+
+执行：
+
+```bash
+cd /Users/scrumpy/Documents/vibebattle
+npm run backend:setup
+```
+
+这个命令会自动完成：
+
+1. 生成 Prisma Client
+2. 执行本地 migration
+3. 执行 seed
+
+seed 会写入最小可用数据：
+
+- 1 个 buyer 用户
+- 1 个 coder 用户
+- 多个任务
+- 报名关系
+- submission 数据
+
+### 第三步：启动后端
+
+开一个新终端窗口，执行：
+
+```bash
+cd /Users/scrumpy/Documents/vibebattle
+npm run backend:dev
+```
+
+后端默认地址：
+
+```bash
+http://127.0.0.1:4000
+```
+
+健康检查：
+
+```bash
+http://127.0.0.1:4000/health
+```
+
+### 第四步：启动前端
+
+再开一个新终端窗口，执行：
+
+```bash
+cd /Users/scrumpy/Documents/vibebattle
+npm run dev
+```
+
+前端默认会读取：
+
+```bash
+VITE_API_BASE_URL=http://127.0.0.1:4000
+```
+
+## 如何确认本地数据库已经正常工作
+
+你可以按下面顺序检查：
+
+### 1. 数据库容器是否已启动
+
+```bash
+cd /Users/scrumpy/Documents/vibebattle
+docker compose ps
+```
+
+你应该能看到 `postgres` 服务处于 `running` 或 `healthy`。
+
+### 2. 后端健康检查是否正常
+
+浏览器打开或命令行执行：
+
+```bash
+curl http://127.0.0.1:4000/health
+```
+
+### 3. 任务接口是否返回真实数据
+
+```bash
+curl http://127.0.0.1:4000/api/tasks
+```
+
+如果返回有任务列表，说明本地数据库、Prisma、后端接口已经打通。
+
+## 如何确认前端已经不再使用 mock data
+
+确认方式：
+
+1. 先执行本地数据库初始化
+2. 打开前端首页、Tasks、Task Detail、Dashboard、Arena
+3. 在 Dashboard 新建一个任务
+4. 刷新页面后这个任务仍然存在
+5. 再请求：
+
+```bash
+curl http://127.0.0.1:4000/api/tasks
+```
+
+如果能在接口返回中看到你刚创建的任务，就说明前端现在走的是：
+
+- 前端 -> 本地后端 API
+- 后端 -> 本地 PostgreSQL
+
+而不是本地 mock 数据。
+
+## 现在哪些页面已经主要使用本地数据库
+
+以下页面本地开发时都优先走真实 API + 本地 PostgreSQL：
+
+- Home
+- Tasks
+- Task Detail
+- Dashboard
+- Arena
+
+说明：
+
+- Home 的推荐任务、首页展示列表已经来自数据库/API
+- Home 中的 showcase / leaderboard 现在也是根据任务 API 数据派生，不再读取本地静态 mock 文件
+
+## 线上环境说明
+
+线上结构不变：
+
+- 前端：Vercel
+- 后端：Render / Railway
+- 数据库：Neon
+
+线上仍然通过部署平台配置自己的 `DATABASE_URL`，本地 docker 数据库不会影响线上。
+
+## 常用命令
+
+### 启动本地数据库
+
+```bash
+npm run db:up
+```
+
+### 关闭本地数据库
+
+```bash
+npm run db:down
+```
+
+### 初始化本地数据库
+
+```bash
+npm run backend:setup
+```
+
+### 启动后端
+
+```bash
+npm run backend:dev
+```
+
+### 启动前端
+
+```bash
+npm run dev
+```
+
+## 启动失败时最常见排查点
+
+### 1. Docker 没启动
+
+表现：
+
+- `docker compose up` 失败
+- PostgreSQL 容器起不来
+
+处理：
+
+- 先打开 Docker Desktop
+
+### 2. 5432 端口被占用
+
+表现：
+
+- PostgreSQL 容器启动失败
+
+处理：
+
+- 关闭本机已有 PostgreSQL
+- 或改 `docker-compose.yml` 端口映射
+
+### 3. 后端 `.env` 没复制
+
+表现：
+
+- Prisma 报 `DATABASE_URL` 缺失
+
+处理：
+
+```bash
+cd /Users/scrumpy/Documents/vibebattle/backend
+cp .env.example .env
+```
+
+### 4. migration 没跑
+
+表现：
+
+- 后端能启动，但接口报数据库表不存在
+
+处理：
+
+```bash
+cd /Users/scrumpy/Documents/vibebattle
+npm run backend:setup
+```
+
+### 5. 前端连到了错误的 API 地址
+
+表现：
+
+- 页面一直加载失败
+- 浏览器网络请求打到线上或错误端口
+
+处理：
+
+- 检查根目录 `.env`
+- 确认 `VITE_API_BASE_URL=http://127.0.0.1:4000`

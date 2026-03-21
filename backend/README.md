@@ -1,127 +1,132 @@
 # VibeBattle Backend
 
-当前后端是 VibeBattle MVP 的 Node.js + Express 骨架。
+当前后端使用：
 
-## 数据库
+- Node.js + Express
+- Prisma
+- PostgreSQL
 
-当前后端已接入 Prisma，并以 PostgreSQL 作为目标数据库。
+本地开发数据库默认使用根目录的 `docker-compose.yml` 启动 PostgreSQL。
 
-## 启动方式
+## 本地启动
+
+### 1. 复制环境变量
 
 ```bash
-cd backend
-npm install
+cd /Users/scrumpy/Documents/vibebattle/backend
+cp .env.example .env
+```
+
+### 2. 启动本地数据库
+
+```bash
+cd /Users/scrumpy/Documents/vibebattle/backend
+npm run db:up
+```
+
+### 3. 初始化数据库
+
+```bash
+cd /Users/scrumpy/Documents/vibebattle/backend
+npm run setup:local
+```
+
+这个命令会依次执行：
+
+1. `prisma generate`
+2. `prisma migrate dev`
+3. `prisma seed`
+
+### 4. 启动后端
+
+```bash
+cd /Users/scrumpy/Documents/vibebattle/backend
 npm run dev
 ```
 
-生产方式：
+生产启动：
 
 ```bash
-cd backend
 npm start
 ```
 
-如果本机 `4000` 端口被占用，可以临时改端口：
+## 常用命令
+
+### 启动本地数据库
 
 ```bash
-cd backend
-PORT=4001 npm start
+npm run db:up
 ```
 
-## Prisma 命令
-
-生成 Prisma Client：
+### 关闭本地数据库
 
 ```bash
-cd backend
+npm run db:down
+```
+
+### 查看数据库日志
+
+```bash
+npm run db:logs
+```
+
+### 生成 Prisma Client
+
+```bash
 npm run prisma:generate
 ```
 
-执行 migration：
+### 执行 migration
 
 ```bash
-cd backend
-npm run prisma:migrate -- --name init
+npm run prisma:migrate -- --name local-init
 ```
 
-部署已存在 migration：
+### 执行 seed
 
 ```bash
-cd backend
-npm run prisma:deploy
-```
-
-执行 seed：
-
-```bash
-cd backend
 npm run prisma:seed
 ```
 
-## 默认端口
+## 环境变量
 
-- `4000`
+- `PORT`
+- `NODE_ENV`
+- `DATABASE_URL`
+- `CORS_ORIGIN`
 
-可通过 `.env` 覆盖，参考 `.env.example`。
+本地默认 `DATABASE_URL` 见：
 
-数据库连接通过 `DATABASE_URL` 配置，参考 `.env.example`。
-CORS 来源通过 `CORS_ORIGIN` 配置，支持单个域名或逗号分隔的多个域名。
+- [/Users/scrumpy/Documents/vibebattle/backend/.env.example](/Users/scrumpy/Documents/vibebattle/backend/.env.example)
+
+## 健康检查
+
+后端健康检查：
+
+- `GET /health`
+
+本地验证：
+
+```bash
+curl http://127.0.0.1:4000/health
+```
 
 ## 当前接口
 
 - `GET /health`
 - `GET /api/tasks`
 - `GET /api/tasks/:id`
+- `GET /api/tasks/:id/join-status`
 - `POST /api/tasks`
 - `POST /api/tasks/:id/join`
 - `POST /api/tasks/:id/submissions`
 - `GET /api/tasks/:id/submissions`
 - `GET /api/users/me`
 
-## 部署建议
-
-推荐组合：
-
-- 前端：Vercel
-- 后端：Render 或 Railway
-- 数据库：Neon Postgres
-
-### Render / Railway 部署后端
-
-1. 将 `backend/` 作为独立服务目录
-2. 安装命令填写：`npm install`
-3. 启动命令填写：`npm start`
-4. 设置环境变量：
-   - `PORT`
-   - `NODE_ENV=production`
-   - `DATABASE_URL`
-   - `CORS_ORIGIN`
-5. 首次部署后执行：
-   - `npm run prisma:deploy`
-   - 如需初始化数据，再执行 `npm run prisma:seed`
-
-### 健康检查
-
-健康检查路径：
-
-- `/health`
-
-部署平台的 health check 可以直接配置为：
-
-- `https://your-backend-domain/health`
-
 ## 当前约束
 
-- 不接鉴权
+- 不接真实登录
 - 不接支付
 - 不接 WebSocket
-- 当前已完成数据库 schema 和 seed，接口层仍以 mock/service 骨架为主
-
-## 下一步建议
-
-下一轮可先引入数据库层，建议优先补：
-
-1. 在 `services/` 之下接 Prisma 查询
-2. 把任务、报名、提交接口逐步切到数据库
-3. 增加 DTO/参数校验
-4. 加入 repository 或 query layer，避免控制器直接写 Prisma
+- 本地开发不再依赖后端自动 mock seed 兜底
+- 本地数据库数据请通过 migration + seed 明确初始化

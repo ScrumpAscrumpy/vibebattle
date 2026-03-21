@@ -49,28 +49,23 @@ export function HomePage() {
   return (
     <div className="container page-stack">
       <section className="hero">
-        <div className="hero__content">
+        <div className="hero__content hero__content--centered">
           <div className="hero__eyebrow">
             <span className="eyebrow">⚡ The Arena for Vibe Coders</span>
           </div>
-          <h1>
-            用 AI 工具竞速解决
-            <br />
-            真实需求，<span className="hero__headline-accent">赢取奖金</span>
-          </h1>
-          <p>
+          <h1 className="hero__title">用 AI 工具竞速解决真实需求，赢取奖金</h1>
+          <p className="hero__lead">
             发布你的需求或参加限时竞赛，用 Vibe Coding 最短时间交付可运行产品。开源你的工作流，获取额外奖励。
           </p>
           <div className="hero__actions">
             <Link className="button" to="/tasks">
-              🍜 浏览赛事
+              浏览赛事
             </Link>
             <Link className="button button--ghost" to="/dashboard">
-              📋 发布任务
+              发布任务
             </Link>
           </div>
         </div>
-
       </section>
 
       {!loading && !error ? (
@@ -89,10 +84,10 @@ export function HomePage() {
         <>
           <section>
             <SectionHeader
-              eyebrow="Featured"
+              eyebrow=""
               title="🔥 热门赛事"
               action={
-                <Link className="button button--ghost" to="/tasks">
+                <Link className="home-link-action" to="/tasks">
                   查看全部 →
                 </Link>
               }
@@ -109,7 +104,7 @@ export function HomePage() {
           </section>
 
           <section className="home-section">
-            <SectionHeader eyebrow="How It Works" title="如何运作" />
+            <SectionHeader eyebrow="" title="如何运作" />
             <div className="feature-flow">
               {[
                 { icon: "📋", title: "发布任务", description: "描述需求与奖金" },
@@ -127,50 +122,66 @@ export function HomePage() {
             </div>
           </section>
 
-          <section className="two-column">
-            <div className="panel">
-              <SectionHeader eyebrow="Showcases" title="开源展示" />
+          <section className="home-secondary">
+            <div className="home-secondary__main panel panel--soft">
+              <SectionHeader
+                eyebrow=""
+                title="开源广场"
+                description="展示近期有提交、有协作热度的任务与工作流。"
+              />
               <div className="list-stack">
-                {showcaseItems.map((item) => (
-                  <article key={item.id} className="list-item">
-                    <div>
-                      <h3>{item.title}</h3>
-                      <p>{item.tools}</p>
-                    </div>
-                    <div className="list-item__meta">
-                      <span>#{item.rank}</span>
-                      <span>{item.author}</span>
-                      <span>{item.duration}</span>
-                    </div>
-                  </article>
-                ))}
+                {showcaseItems.length > 0 ? (
+                  showcaseItems.map((item) => (
+                    <article key={item.id} className="list-item list-item--soft">
+                      <div>
+                        <h3>{item.title}</h3>
+                        <p>{item.tools}</p>
+                      </div>
+                      <div className="list-item__meta">
+                        <span>#{item.rank}</span>
+                        <span>{item.author}</span>
+                        <span>{item.duration}</span>
+                      </div>
+                    </article>
+                  ))
+                ) : (
+                  <EmptyState title="暂无展示内容" description="当任务开始有报名和提交后，这里会出现工作流与展示案例。" />
+                )}
               </div>
             </div>
 
-            <div className="panel">
-              <SectionHeader eyebrow="Leaderboard" title="排行榜" />
+            <aside className="home-secondary__side panel panel--soft">
+              <SectionHeader
+                eyebrow=""
+                title="排行榜"
+                description="当前站内较活跃的任务发布者与交付表现。"
+              />
               <div className="list-stack">
-                {leaderboard.map((item) => (
-                  <article key={item.rank} className="list-item">
-                    <div>
-                      <h3>
-                        #{item.rank} {item.name}
-                      </h3>
-                      <p>
-                        ELO {item.elo} · {item.wins}/{item.total} 胜
-                      </p>
-                    </div>
-                    <div className="list-item__meta">
-                      <span>{item.avgTime}</span>
-                    </div>
-                  </article>
-                ))}
+                {leaderboard.length > 0 ? (
+                  leaderboard.map((item) => (
+                    <article key={`${item.rank}-${item.name}`} className="list-item list-item--soft">
+                      <div>
+                        <h3>
+                          #{item.rank} {item.name}
+                        </h3>
+                        <p>
+                          ELO {item.elo} · {item.wins}/{item.total} 胜
+                        </p>
+                      </div>
+                      <div className="list-item__meta">
+                        <span>{item.avgTime}</span>
+                      </div>
+                    </article>
+                  ))
+                ) : (
+                  <EmptyState title="暂无排行数据" description="当任务与提交增多后，这里会展示更稳定的榜单。" />
+                )}
               </div>
-            </div>
+            </aside>
           </section>
 
           <section className="home-section">
-            <SectionHeader eyebrow="Value" title="三方共赢" />
+            <SectionHeader eyebrow="" title="三方共赢" />
             <div className="value-grid">
               <article className="value-card">
                 <h3>🏢 买家</h3>
