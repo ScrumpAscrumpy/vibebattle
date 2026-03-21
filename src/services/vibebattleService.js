@@ -1,5 +1,3 @@
-import { leaderboard } from "../data/leaderboard";
-import { showcases } from "../data/showcases";
 import { apiRequest, getStoredCurrentUser } from "../lib/apiClient";
 
 const LEGACY_STORAGE_KEYS = [
@@ -74,6 +72,48 @@ function normalizeSubmission(submission) {
   };
 }
 
+function deriveShowcases(tasks) {
+  return tasks
+    .filter((task) => task.submissionCount > 0 || task.currentParticipants > 0)
+    .sort((left, right) => {
+      if (right.submissionCount !== left.submissionCount) {
+        return right.submissionCount - left.submissionCount;
+      }
+
+      return right.currentParticipants - left.currentParticipants;
+    })
+    .slice(0, 3)
+    .map((task, index) => ({
+      id: task.id,
+      title: task.title,
+      author: task.creator.displayName,
+      tools: (task.techTags ?? []).join(" + ") || "VibeBattle Stack",
+      duration: `${task.durationHours} h`,
+      likes: task.currentParticipants * 8 + task.submissionCount * 12,
+      views: task.currentParticipants * 120 + task.submissionCount * 80,
+      rank: index + 1,
+    }));
+}
+
+function deriveLeaderboard(tasks) {
+  const entries = tasks.map((task, index) => ({
+    rank: index + 1,
+    name: task.creator.displayName,
+    elo: 1600 + task.currentParticipants * 9 + task.submissionCount * 15 + (4 - task.difficulty) * 7,
+    wins: task.submissionCount,
+    total: Math.max(task.currentParticipants, task.submissionCount),
+    avgTime: `${task.durationHours} h`,
+  }));
+
+  return entries
+    .sort((left, right) => right.elo - left.elo)
+    .slice(0, 5)
+    .map((entry, index) => ({
+      ...entry,
+      rank: index + 1,
+    }));
+}
+
 export async function getTasks(filters = {}) {
   clearLegacyStorage();
 
@@ -98,6 +138,16 @@ export async function getFeaturedTasks() {
   return tasks.slice(0, 3);
 }
 
+export async function getHomeFeed() {
+  const tasks = await getTasks({ orderBy: "createdAt" });
+
+  return {
+    featuredTasks: tasks.slice(0, 3),
+    showcases: deriveShowcases(tasks),
+    leaderboard: deriveLeaderboard(tasks),
+  };
+}
+
 export async function getTaskById(taskId) {
   clearLegacyStorage();
   const response = await apiRequest(`/api/tasks/${taskId}`);
@@ -115,11 +165,13 @@ export async function getDashboardSummary() {
 }
 
 export async function getShowcases() {
-  return showcases;
+  const tasks = await getTasks({ orderBy: "createdAt" });
+  return deriveShowcases(tasks);
 }
 
 export async function getLeaderboard() {
-  return leaderboard;
+  const tasks = await getTasks({ orderBy: "createdAt" });
+  return deriveLeaderboard(tasks);
 }
 
 export async function createTask(input) {
