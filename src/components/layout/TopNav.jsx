@@ -26,9 +26,9 @@ export function TopNav() {
   }
 
   const navItems = [
-    { to: "/", label: "Home", end: true },
-    { to: "/tasks", label: "Tasks" },
-    ...(currentUser?.role === "BUYER" ? [{ to: "/dashboard", label: "Dashboard" }] : []),
+    { to: "/tasks", label: "任务市场" },
+    { to: "/", label: "开源广场", end: true },
+    { to: "/", label: "排行榜", end: true },
   ];
 
   return (
@@ -58,6 +58,14 @@ export function TopNav() {
         </nav>
 
         <div className="top-nav__user">
+          <div className="top-nav__auth">
+            <button className="button button--ghost top-nav__auth-button" type="button">
+              登录
+            </button>
+            <button className="button top-nav__auth-button" type="button">
+              注册
+            </button>
+          </div>
           <div className="role-switcher">
             <button
               className={currentUser?.role === "BUYER" ? "role-switcher__button role-switcher__button--active" : "role-switcher__button"}

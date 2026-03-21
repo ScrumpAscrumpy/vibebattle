@@ -4,9 +4,12 @@ import { Pill } from "./Pill";
 
 export function TaskCard({ task }) {
   const tags = task.techTags.slice(0, 3);
+  const level = Math.max(1, Math.min(4, Number(task.difficulty) || 1));
+  const stars = `${"★".repeat(level)}${"☆".repeat(4 - level)}`;
 
   return (
     <article className="task-card">
+      <div className="task-card__accent" />
       <div className="task-card__top">
         <div className="task-card__status-group">
           <StatusBadge status={task.status} />
@@ -23,13 +26,9 @@ export function TaskCard({ task }) {
         <p className="task-card__brief">{task.brief || task.summary}</p>
       </div>
 
-      <div className="task-card__meta">
-        <span className="meta-chip">难度 {task.difficulty}/4</span>
-        <span className="meta-chip">{task.type}</span>
-        <span className="meta-chip">{task.timeLimit} min</span>
-        <span className="meta-chip">
-          {task.currentParticipants}/{task.maxParticipants} 人
-        </span>
+      <div className="task-card__rating-row">
+        <span className="task-card__stars">{stars}</span>
+        <span className="task-card__time">◷ {task.timeLimit}min</span>
       </div>
 
       <div className="pill-row">
@@ -41,15 +40,15 @@ export function TaskCard({ task }) {
 
       <div className="task-card__footer">
         <div className="task-card__creator">
-          <strong>{task.creator.displayName}</strong>
-          <span>{task.currentParticipants}/{task.maxParticipants} 已报名</span>
+          <div className="task-card__avatar">{task.creator.displayName.slice(0, 2).toUpperCase()}</div>
+          <div>
+            <strong>{task.creator.displayName}</strong>
+            <span>{task.currentParticipants}/{task.maxParticipants} 已报名</span>
+          </div>
         </div>
         <div className="task-card__actions">
-          <Link className="button button--ghost" to={`/tasks/${task.id}`}>
+          <Link className="text-link" to={`/tasks/${task.id}`}>
             查看详情
-          </Link>
-          <Link className="button" to={`/arena/${task.id}`}>
-            进入 Arena
           </Link>
         </div>
       </div>

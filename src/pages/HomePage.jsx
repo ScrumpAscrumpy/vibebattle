@@ -5,7 +5,7 @@ import { FeedbackBanner } from "../components/ui/FeedbackBanner";
 import { SectionHeader } from "../components/ui/SectionHeader";
 import { StatCard } from "../components/ui/StatCard";
 import { TaskCard } from "../components/ui/TaskCard";
-import { getFeaturedTasks, getLeaderboard, getShowcases } from "../services/vibebattleService";
+import { getHomeFeed } from "../services/vibebattleService";
 
 export function HomePage() {
   const [featuredTasks, setFeaturedTasks] = useState([]);
@@ -22,16 +22,12 @@ export function HomePage() {
       setError("");
 
       try {
-        const [tasksResult, showcaseResult, leaderboardResult] = await Promise.all([
-          getFeaturedTasks(),
-          getShowcases(),
-          getLeaderboard(),
-        ]);
+        const homeFeed = await getHomeFeed();
 
         if (!cancelled) {
-          setFeaturedTasks(tasksResult);
-          setShowcaseItems(showcaseResult);
-          setLeaderboard(leaderboardResult);
+          setFeaturedTasks(homeFeed.featuredTasks);
+          setShowcaseItems(homeFeed.showcases);
+          setLeaderboard(homeFeed.leaderboard);
         }
       } catch {
         if (!cancelled) {
@@ -55,124 +51,49 @@ export function HomePage() {
       <section className="hero">
         <div className="hero__content">
           <div className="hero__eyebrow">
-            <span className="hero__eyebrow-dot" />
-            <span className="eyebrow">VibeCoding 竞技场 · 实时在线</span>
+            <span className="eyebrow">⚡ The Arena for Vibe Coders</span>
           </div>
           <h1>
-            代码竞速
+            用 AI 工具竞速解决
             <br />
-            <span className="hero__headline-accent">真实需求</span>
-            <br />
-            赢取奖金
+            真实需求，<span className="hero__headline-accent">赢取奖金</span>
           </h1>
           <p>
-            买家发布真实需求，参赛者用 AI 辅助编程竞速交付。用时更短、完成度更高的方案获得奖金，开源工作流还能拿到额外奖励。
+            发布你的需求或参加限时竞赛，用 Vibe Coding 最短时间交付可运行产品。开源你的工作流，获取额外奖励。
           </p>
           <div className="hero__actions">
             <Link className="button" to="/tasks">
-              立即参赛
+              🍜 浏览赛事
             </Link>
             <Link className="button button--ghost" to="/dashboard">
-              发布悬赏任务
+              📋 发布任务
             </Link>
-          </div>
-          <div className="hero__metrics">
-            <div className="hero__metric">
-              <strong>{featuredTasks.length || 3}</strong>
-              <span>悬赏任务在线开放</span>
-            </div>
-            <div className="hero__metric">
-              <strong>{leaderboard.length || 5}</strong>
-              <span>排行榜持续更新</span>
-            </div>
-            <div className="hero__metric">
-              <strong>Live</strong>
-              <span>任务、报名、提交已联调</span>
-            </div>
           </div>
         </div>
 
-        <div className="hero__stats">
-          <StatCard label="赏金任务" value={`$${featuredTasks[0]?.bountyAmount ?? 5000}`} hint="当前推荐任务奖金" />
-          <StatCard label="参与模式" value="Buyer / Coder" hint="角色切换保留现有逻辑" />
-          <StatCard label="任务来源" value="Real API" hint="任务核心数据来自后端" />
-          <div className="hero__terminal">
-            <div className="hero__terminal-bar">
-              <span className="hero__terminal-dot hero__terminal-dot--red" />
-              <span className="hero__terminal-dot hero__terminal-dot--yellow" />
-              <span className="hero__terminal-dot hero__terminal-dot--green" />
-              <span className="hero__terminal-title">vibearena.live.feed</span>
-            </div>
-            <div className="hero__terminal-body">
-              <div className="hero__terminal-line">
-                <span className="hero__terminal-prompt">$</span>
-                <span>contest start #{featuredTasks[0]?.id?.slice?.(0, 4) ?? "2847"}</span>
-              </div>
-              <div className="hero__terminal-output">任务: {featuredTasks[0]?.title ?? "智能简历生成器"}</div>
-              <div className="hero__terminal-output">
-                奖金: ${featuredTasks[0]?.bountyAmount ?? 5000}
-                {featuredTasks[0]?.openSourceBonus ? ` + $${featuredTasks[0].openSourceBonus} 开源奖` : ""}
-              </div>
-              <div className="hero__terminal-output">
-                参赛者: {featuredTasks[0]?.currentParticipants ?? 23} 人
-              </div>
-              <hr className="hero__terminal-divider" />
-              <div className="hero__terminal-line">
-                <span className="hero__terminal-prompt">$</span>
-                <span>leaderboard --live</span>
-              </div>
-              {leaderboard.slice(0, 3).map((item) => (
-                <div key={item.rank} className="hero__terminal-output">
-                  {item.rank}. {item.name} · ELO {item.elo}
-                </div>
-              ))}
-              <hr className="hero__terminal-divider" />
-              <div className="hero__terminal-line">
-                <span className="hero__terminal-prompt">$</span>
-                <span>submit</span>
-                <span className="hero__terminal-cursor" />
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
+
+      {!loading && !error ? (
+        <div className="stats-grid hero-stats-grid">
+          <StatCard label="🏆 已举办赛事" value="1,247" hint="" />
+          <StatCard label="💰 总奖金池" value="$487K" hint="" />
+          <StatCard label="⚡ 活跃 Coder" value="3,892" hint="" />
+          <StatCard label="⏱ 平均完赛时间" value="38min" hint="" />
+        </div>
+      ) : null}
 
       {error ? <FeedbackBanner type="error">{error}</FeedbackBanner> : null}
       {loading ? <div className="panel loading-panel">首页加载中...</div> : null}
 
       {!loading && !error ? (
         <>
-          <section className="home-section">
-            <SectionHeader
-              eyebrow="How It Works"
-              title="五步跑通一场 Vibe Coding 竞赛"
-              description="沿用现有 buyer / coder 角色和后端接口，只把首页表达调整为更完整的平台叙事。"
-            />
-            <div className="feature-flow">
-              {[
-                { icon: "📋", title: "发布任务", description: "买家填写需求、奖金和交付规则，快速发起一场可执行的竞赛。" },
-                { icon: "🙋", title: "报名参赛", description: "Coder 浏览任务市场，按方向、难度和奖金选择要投入的赛题。" },
-                { icon: "⏱", title: "进入 Arena", description: "统一围绕任务边界推进实现，保持提交节奏与作品说明同步。" },
-                { icon: "🚀", title: "提交作品", description: "Repo、部署链接和 notes 都通过现有 API 写入，保留当前联调链路。" },
-                { icon: "🌟", title: "开源展示", description: "优秀工作流和作品沉淀为 Showcase，为后续社区扩展预留空间。" },
-              ].map((item) => (
-                <article key={item.title} className="feature-flow__item">
-                  <span className="feature-flow__icon">{item.icon}</span>
-                  <h3>{item.title}</h3>
-                  <p>{item.description}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-
           <section>
             <SectionHeader
               eyebrow="Featured"
-              title="推荐任务"
-              description="面向真实交付场景的悬赏与挑战任务，保留现有 API 数据流。"
+              title="🔥 热门赛事"
               action={
                 <Link className="button button--ghost" to="/tasks">
-                  查看全部
+                  查看全部 →
                 </Link>
               }
             />
@@ -185,6 +106,25 @@ export function HomePage() {
             ) : (
               <EmptyState title="暂无推荐任务" description="可以先去 Dashboard 创建一个任务。" />
             )}
+          </section>
+
+          <section className="home-section">
+            <SectionHeader eyebrow="How It Works" title="如何运作" />
+            <div className="feature-flow">
+              {[
+                { icon: "📋", title: "发布任务", description: "描述需求与奖金" },
+                { icon: "🙋", title: "报名参赛", description: "选择感兴趣的赛事" },
+                { icon: "⏱", title: "同步开赛", description: "倒计时开始，同时出发" },
+                { icon: "🚀", title: "提交评审", description: "完成后一键提交" },
+                { icon: "🌟", title: "开源展示", description: "公开工作流赢额外奖励" },
+              ].map((item) => (
+                <article key={item.title} className="feature-flow__item">
+                  <span className="feature-flow__icon">{item.icon}</span>
+                  <h3>{item.title}</h3>
+                  <p>{item.description}</p>
+                </article>
+              ))}
+            </div>
           </section>
 
           <section className="two-column">
@@ -230,25 +170,40 @@ export function HomePage() {
           </section>
 
           <section className="home-section">
-            <SectionHeader
-              eyebrow="Value"
-              title="为什么它像一个真正的产品，而不只是演示页"
-              description="不新增后端功能，只基于现有 API、路由和角色切换，强化平台定位与信息层级。"
-            />
+            <SectionHeader eyebrow="Value" title="三方共赢" />
             <div className="value-grid">
               <article className="value-card">
-                <h3>对 Buyer</h3>
-                <p>更快验证需求，公开奖金与规则，用竞赛机制筛选更优交付方案。</p>
+                <h3>🏢 买家</h3>
+                <p>竞赛价格获得多方案</p>
+                <p>最短时间看到可运行产品</p>
+                <p>全过程透明可回溯</p>
               </article>
               <article className="value-card">
-                <h3>对 Coder</h3>
-                <p>围绕真实任务竞速交付，沉淀可展示作品和开源工作流，形成个人声誉。</p>
+                <h3>⚡ 参赛者</h3>
+                <p>展示 AI 工具链实力</p>
+                <p>赢取奖金建立品牌</p>
+                <p>开源工作流获额外收入</p>
               </article>
               <article className="value-card">
-                <h3>对平台</h3>
-                <p>任务、报名、提交、控制台都已经形成闭环，后续只需继续增强评审和运营能力。</p>
+                <h3>🎯 主办方</h3>
+                <p>品牌曝光与用户增长</p>
+                <p>获取工具链使用数据</p>
+                <p>建立开发者社区</p>
               </article>
             </div>
+
+            <article className="home-cta">
+              <h3>准备好了吗？</h3>
+              <p>无论你是有需求的买家，还是身怀绝技的 Vibe Coder，这里都有你的舞台。</p>
+              <div className="stack-actions">
+                <Link className="button" to="/tasks">
+                  我是开发者，去参赛
+                </Link>
+                <Link className="button button--ghost home-cta__accent" to="/dashboard">
+                  我有需求，去发布
+                </Link>
+              </div>
+            </article>
           </section>
         </>
       ) : null}
